@@ -1,6 +1,6 @@
 # Bootcamp Python AI Backend Developer Projects
 
-Este repositório contém os desafios de projetos do bootcamp Python AI Backend Developer da Digital Innovation One (DIO). Cada desafio é uma oportunidade para praticar e aprimorar suas habilidades em Python e desenvolvimento de backend para inteligência artificial.
+Este repositório contém os desafios de projetos do bootcamp Python AI Backend Developer da Digital Innovation One (DIO). Cada desafio é uma oportunidade para praticar e aprimorar suas habilidades em Python e desenvolvimento de back-end para inteligência artificial.
 
 ## Desafios de Projetos
 
