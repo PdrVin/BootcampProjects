@@ -1,4 +1,4 @@
-import funcoesBank as fb
+import funcoes_bank as fb
 
 def main():
     # Constantes
