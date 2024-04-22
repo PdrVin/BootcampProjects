@@ -24,13 +24,13 @@ def depositar(saldo: float, value: float, extract: str, /) -> tuple:
                     f'Depósito:\tR$ {value:.2f}'
                     f'\033[m\n')
         print('\033[92m'
-              'Depósito realizado com sucesso!'
-              '\033[m')
+            'Depósito realizado com sucesso!'
+            '\033[m')
     
     else:
         print('\033[91m'
-              'Operação falhou! Valor informado inválido.'
-              '\033[m')
+            'Operação falhou! Valor informado inválido.'
+            '\033[m')
     
     return saldo, extract
 
@@ -43,31 +43,31 @@ def sacar(*, saldo: float, value: float, extract: str, limit, num_saques: int, l
     
     if saldo_exceeded:
         print('\033[91m'
-              'Operação falhou! Você não tem saldo suficiente.'
-              '\033[m')
+            'Operação falhou! Você não tem saldo suficiente.'
+            '\033[m')
     
     elif limit_exceeded:
         print('\033[91m'
-              'Operação falhou! Valor do saque maior que o limite permitido.'
-              '\033[m')
+            'Operação falhou! Valor do saque maior que o limite permitido.'
+            '\033[m')
     
     elif saque_exceeded:
         print('\033[91m'
-              'Operação falhou! Número de saques excedidos.'
-              '\033[m')
-
+            'Operação falhou! Número de saques excedidos.'
+            '\033[m')
+    
     elif value > 0:
         saldo -= value
         extract += (f'\033[91m'
                     f'Saque: \t\tR$ {value:.2f}'
                     f'\033[m\n')
         num_saques += 1
-
+    
     else:
         print('\033[91m'
-              'Operação falhou! Valor informado é inválido.'
-              '\033[m')
-
+            'Operação falhou! Valor informado é inválido.'
+            '\033[m')
+    
     return saldo, extract
 
 
@@ -79,8 +79,8 @@ def visualizar_historico(saldo: float, /, *, extract: str):
     print("Sem movimentações" if not extract else extract)
     
     print(f'\033[94m'
-          f'Saldo:\t\tR$ {saldo:.2f}'
-          f'\033[m')
+        f'Saldo:\t\tR$ {saldo:.2f}'
+        f'\033[m')
     
     print(f'{"":=^26}')
 
@@ -110,8 +110,8 @@ def create_user(users: list) -> list:
     users.append(user_data)
     
     print('\033[92m'
-          'Usuário cadastrado com sucesso!'
-          '\033[m')
+        'Usuário cadastrado com sucesso!'
+        '\033[m')
 
 
 # Filtrar Usuários
@@ -132,15 +132,15 @@ def create_current_account(agency: str, account_num: int, users: list) -> dict:
     
     if user:
         print('\033[92m'
-              'Conta criada com sucesso!'
-              '\033[m')
+            'Conta criada com sucesso!'
+            '\033[m')
         return {'agency': agency,
                 'account_num': account_num,
                 'user': user}
     
     print('\033[91m'
-          'Usuário não encontrado, Fluxo de criação de conta encerrado!.'
-          '\033[m')
+        'Usuário não encontrado, Fluxo de criação de conta encerrado!'
+        '\033[m')
 
 
 # Listar Contas
