@@ -8,9 +8,9 @@ Este repositório contém os desafios de projetos do bootcamp Python AI Backend 
    - Uma experiência prática de desenvolvimento de software financeiro.
 
 2. **Desafio 2: [Otimizando um Sistema Bancário com Funções Python](https://github.com/PdrVin/BootcampProjects/tree/main/02-SistemaBancarioFuncoes)**
-   - Descrição breve do desafio.
+   - Otimização do sistema com funções que tornam a programação mais limpa e escalável.
 
-3. **Desafio 3: [Nome do Desafio](link_do_desafio)**
+3. **Desafio 3: [Modelando o Sistema Bancário em POO com Python](https://github.com/PdrVin/BootcampProjects/tree/main/03-SistemaBancarioPOO)**
    - Descrição breve do desafio.
    - Requisitos técnicos.
 
