@@ -1,4 +1,4 @@
-from abc import ABC, ABCMeta, abstractclassmethod, abstractproperty
+from abc import ABC, abstractclassmethod, abstractproperty
 from datetime import datetime
 import textwrap
 
@@ -36,27 +36,27 @@ class Conta:
         return cls(number, client)
     
     @property
-    def saldo(self):
+    def getSaldo(self):
         return self._balance
     
     @property
-    def number(self):
+    def getNumber(self):
         return self._number
     
     @property
-    def agency(self):
+    def getAgency(self):
         return self._agency
     
     @property
-    def client(self):
+    def getClient(self):
         return self._client
     
     @property
-    def history(self):
+    def getHistory(self):
         return self._history
     
     def sacar(self, value: float):
-        saldo = self.saldo
+        saldo = self.getSaldo
         saldo_exceeded = value > saldo
         
         if saldo_exceeded:
@@ -95,18 +95,18 @@ class Conta:
 
 
 class ContaCorrente(Conta):
-    def __init__(self, number, client, limit = 500.0, limit_saques = 3):
+    def __init__(self, number: Conta, client: Cliente, limit = 500.0, limit_saques = 3):
         super().__init__(number, client)
-        self.limit = limit
-        self.limit_saques = limit_saques
+        self._limit = limit
+        self._limit_saques = limit_saques
     
     def sacar(self, value: float):
         num_saques = len(
             [transact for transact in self.history.trasactions if transact['type'] == Saque.__name__]
         )
         
-        limit_exceeded = value > self.limit
-        saques_exceeded = num_saques >= self.limit_saques
+        limit_exceeded = value > self._limit
+        saques_exceeded = num_saques >= self._limit_saques
         
         if limit_exceeded:
             print('\033[91m'
@@ -123,9 +123,9 @@ class ContaCorrente(Conta):
     
     def __str__(self) -> str:
         return f"""\
-            Agência:\t{self.agency}
-            C/C:\t\t{self.number}
-            Titular:\t{self.client.name}
+            Agência:\t{self._agency}
+            C/C:\t\t{self._number}
+            Titular:\t{self._client.name}
         """
 
 
@@ -212,7 +212,7 @@ def recover_account(client):
         print('\033[91m'
             'Cliente não possui conta!'
             '\033[m')
-    return client.accounts[0]
+    return 
 
 
 # Deposito
@@ -302,12 +302,14 @@ def create_client(clients: list):
             '\033[m')
         return
     
-    clients.append(PessoaFisica({
+    user_data = {
         'cpf': cpf,
         'name': input('Informe o nome completo: '),
         'birth_date': input('Informe a data de nascimento (dd-mm-aaaa): '),
         'address': input('Informe o endereço (logradouro, num - bairro - cidade/uf): ')
-    }))
+    }
+    
+    clients.append(PessoaFisica(**user_data))
     
     print('\033[92m'
         'Usuário cadastrado com sucesso!'
@@ -334,7 +336,7 @@ def create_current_account(num_account, clients, accounts):
 
 
 # Listar Contas
-def list_accounts(accounts):
+def list_accounts(accounts: list):
     for account in accounts:
         print('=' * 30)
         print(textwrap.dedent(str(account)))
@@ -348,7 +350,7 @@ def main():
     # Loop de Seleção
     while True:
         # Exibição Menu
-        option = menu()
+        option = menu().upper()
         
         # Opção Depósito
         if option == 'D':
@@ -368,8 +370,8 @@ def main():
         
         # Opção Nova Conta
         elif option == 'N':
-            num_account = len(contas) + 1
-            create_current_account(num_account, clientes, contas)
+            num_conta = len(contas) + 1
+            create_current_account(num_conta, clientes, contas)
         
         # Opção Listar Contas
         elif option == 'L':
@@ -384,3 +386,6 @@ def main():
             print('\033[91m'
                 'Operação inválida, por favor selecione novamente a operação desejada.'
                 '\033[m')
+
+
+main()
