@@ -16,15 +16,15 @@ class Cliente:
 
 
 class PessoaFisica(Cliente):
-    def __init__(self, cpf: str, name: str, birth_date: str, **kw):
-        super().__init__(**kw)
+    def __init__(self, cpf: str, name: str, birth_date: str, address):
+        super().__init__(address)
         self.cpf = cpf
         self.name = name
         self.birth_date = birth_date
 
 
 class Conta:
-    def __init__(self, number: int, client: Cliente):
+    def __init__(self, number, client):
         self._balance = 0.0
         self._number = number
         self._agency = "0001"
@@ -36,27 +36,27 @@ class Conta:
         return cls(number, client)
     
     @property
-    def saldo(self):
+    def get_saldo(self):
         return self._balance
     
     @property
-    def number(self):
+    def get_number(self):
         return self._number
     
     @property
-    def agency(self):
+    def get_agency(self):
         return self._agency
     
     @property
-    def client(self):
+    def get_client(self):
         return self._client
     
     @property
-    def history(self):
+    def get_history(self):
         return self._history
     
     def sacar(self, value: float):
-        saldo = self.saldo
+        saldo = self.get_saldo
         saldo_exceeded = value > saldo
         
         if saldo_exceeded:
@@ -67,8 +67,8 @@ class Conta:
         elif value > 0:
             self._balance -= value
             print(f'\033[91m'
-                f'Saque: \t\tR$ {value:.2f}'
-                f'\033[m\n')
+                f'Retirada:\tR$ {value:.2f}'
+                f'\033[m')
             return True
         
         else:
@@ -81,9 +81,9 @@ class Conta:
     def depositar(self, value: float):
         if value > 0:
             self._balance += value
-            print('\033[92m'
-                'Depósito realizado com sucesso!'
-                '\033[m')
+            print(f'\033[92m'
+                    f'Depósito:\tR$ {value:.2f}'
+                    f'\033[m')
         
         else:
             print('\033[91m'
@@ -95,14 +95,14 @@ class Conta:
 
 
 class ContaCorrente(Conta):
-    def __init__(self, number, client, limit = 500.0, limit_saques = 3):
+    def __init__(self, number, client, limit=500.0, limit_saques=3):
         super().__init__(number, client)
         self._limit = limit
         self._limit_saques = limit_saques
     
     def sacar(self, value: float):
         num_saques = len(
-            [transact for transact in self.history.trasactions if transact['type'] == Saque.__name__]
+            [transact for transact in self.get_history.transactions if transact['type'] == Saque.__name__]
         )
         
         limit_exceeded = value > self._limit
@@ -123,20 +123,20 @@ class ContaCorrente(Conta):
     
     def __str__(self) -> str:
         return f"""\
-            Agência:\t{self._agency}
-            C/C:\t\t{self._number}
-            Titular:\t{self._client.name}
+            Agência:\t{self.get_agency}
+            C/C:\t\t{self.get_number}
+            Titular:\t{self.get_client.name}
         """
 
 
 class Transacao(ABC):
     @property
     @abstractproperty
-    def value(self) -> float:
+    def get_value(self) -> float:
         pass
 
     @abstractclassmethod
-    def register(self, account: Conta):
+    def register(self, account):
         pass
 
 
@@ -145,11 +145,17 @@ class Historico:
         self._transactions = list()
     
     @property
-    def add_transaction(self, transaction: Transacao):
+    def transactions(self):
+        return self._transactions    
+    
+    def add_transaction(self, transaction):
         self._transactions.append(
             {
-                "type": transaction.__class__.__name__,
-                "value": transaction.value,
+                "type": 
+                    "\033[91m" + "Retirada"
+                    if transaction.__class__.__name__ == "Saque"
+                    else "\033[92m" + "Deposito",
+                "value": transaction.get_value,
                 "date": datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
             }
         )
@@ -160,14 +166,14 @@ class Saque(Transacao):
         self._value = value
     
     @property
-    def value(self):
+    def get_value(self):
         return self._value
     
     def register(self, account):
-        transaction_sucessed = account.sacar(self.value)
+        transaction_sucessed = account.sacar(self.get_value)
         
         if transaction_sucessed:
-            account.history.add_transaction(self)
+            account.get_history.add_transaction(self)
 
 
 class Deposito(Transacao):
@@ -175,20 +181,20 @@ class Deposito(Transacao):
         self._value = value
     
     @property
-    def value(self):
+    def get_value(self):
         return self._value
     
     def register(self, account):
-        transaction_sucessed = account.depositar(self.value)
+        transaction_sucessed = account.depositar(self.get_value)
         
         if transaction_sucessed:
-            account.history.add_transaction(self)
+            account.get_history.add_transaction(self)
 
 
 def menu():
     title = " MENU "
-    menu = f"""
-    {title:=^22}
+    display = f"""
+    {title:=^24}
     [D]\tDepositar
     [S]\tSacar
     [E]\tExtrato
@@ -197,7 +203,7 @@ def menu():
     [L]\tListar Contas
     [Q]\tSair
     => """
-    return input(textwrap.dedent(menu))
+    return input(textwrap.dedent(display))
 
 
 # Filtrar Usuários
@@ -217,7 +223,7 @@ def recover_account(client):
 
 
 # Deposito
-def depositar(clients):
+def depositar(clients: list):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
     
@@ -274,22 +280,24 @@ def show_extract(clients: list):
         return
     
     title = ' EXTRATO '
-    print(f'{title:=^26}')
+    print(f'{title:=^24}')
     
-    transactions = account.history.transactions
+    transactions = account.get_history.transactions
     extract = ""
     
     if not transactions:
         extract = "Não foram realizadas movimentações!"
     else:
         for transaction in transactions:
-            extract += f"\n{transaction['type']}:\n\tR$ {transaction['value']:.2f}"
+            extract += (f"{transaction['type']}:\t"
+                        f"R$ {transaction['value']:>8.2f}"
+                        f"\033[m\n")
     
     print(extract)
     print(f'\033[94m'
-        f'Saldo:\t\tR$ {account.saldo:.2f}'
+        f'Saldo:\t\tR$ {account.get_saldo:>8.2f}'
         f'\033[m')
-    print(f'{"":=^26}')
+    print(f'{"":=^24}')
 
 
 # Criar Cliente
@@ -310,8 +318,7 @@ def create_client(clients: list):
         'address': input('Informe o endereço (logradouro, num - bairro - cidade/uf): ')
     }
     
-    client = PessoaFisica(**user_data)
-    clients.append(client)
+    clients.append(PessoaFisica(**user_data))
     
     print('\033[92m'
         'Usuário cadastrado com sucesso!'
