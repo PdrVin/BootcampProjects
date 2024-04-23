@@ -6,9 +6,9 @@ import textwrap
 class Cliente:
     def __init__(self, address: str):
         self.address = address
-        self.accounts = list()
+        self.accounts = []
     
-    def transact(self, account, transaction):
+    def make_transact(self, account, transaction):
         transaction.register(account)
     
     def add_account(self, account):
@@ -16,8 +16,8 @@ class Cliente:
 
 
 class PessoaFisica(Cliente):
-    def __init__(self, cpf: str, name: str, birth_date: str, address: str):
-        super().__init__(address)
+    def __init__(self, cpf: str, name: str, birth_date: str, **kw):
+        super().__init__(**kw)
         self.cpf = cpf
         self.name = name
         self.birth_date = birth_date
@@ -36,27 +36,27 @@ class Conta:
         return cls(number, client)
     
     @property
-    def getSaldo(self):
+    def saldo(self):
         return self._balance
     
     @property
-    def getNumber(self):
+    def number(self):
         return self._number
     
     @property
-    def getAgency(self):
+    def agency(self):
         return self._agency
     
     @property
-    def getClient(self):
+    def client(self):
         return self._client
     
     @property
-    def getHistory(self):
+    def history(self):
         return self._history
     
     def sacar(self, value: float):
-        saldo = self.getSaldo
+        saldo = self.saldo
         saldo_exceeded = value > saldo
         
         if saldo_exceeded:
@@ -95,7 +95,7 @@ class Conta:
 
 
 class ContaCorrente(Conta):
-    def __init__(self, number: Conta, client: Cliente, limit = 500.0, limit_saques = 3):
+    def __init__(self, number, client, limit = 500.0, limit_saques = 3):
         super().__init__(number, client)
         self._limit = limit
         self._limit_saques = limit_saques
@@ -156,14 +156,14 @@ class Historico:
 
 
 class Saque(Transacao):
-    def __init__(self, value: float):
+    def __init__(self, value):
         self._value = value
     
     @property
-    def value(self) -> float:
+    def value(self):
         return self._value
     
-    def register(self, account: Conta):
+    def register(self, account):
         transaction_sucessed = account.sacar(self.value)
         
         if transaction_sucessed:
@@ -171,14 +171,14 @@ class Saque(Transacao):
 
 
 class Deposito(Transacao):
-    def __init__(self, value: float):
+    def __init__(self, value):
         self._value = value
     
     @property
-    def value(self) -> float:
+    def value(self):
         return self._value
     
-    def register(self, account: Conta):
+    def register(self, account):
         transaction_sucessed = account.depositar(self.value)
         
         if transaction_sucessed:
@@ -201,7 +201,7 @@ def menu():
 
 
 # Filtrar Usuários
-def filter_client(cpf: int, clients: list):
+def filter_client(cpf: str, clients: list):
     filtered_clients = [client for client in clients if client.cpf == cpf]
     return filtered_clients[0] if filtered_clients else None
 
@@ -212,11 +212,12 @@ def recover_account(client):
         print('\033[91m'
             'Cliente não possui conta!'
             '\033[m')
-    return 
+    # FIXME
+    return client.accounts[0]
 
 
 # Deposito
-def depositar(clients: list):
+def depositar(clients):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
     
@@ -233,7 +234,7 @@ def depositar(clients: list):
     if not account:
         return
     
-    client.transact(account, transaction)
+    client.make_transact(account, transaction)
 
 
 # Saque
@@ -247,14 +248,14 @@ def sacar(clients: list):
             '\033[m')
         return
     
-    value = float(input("Informe o valor do depósito: "))
+    value = float(input("Informe o valor do saque: "))
     transaction = Saque(value)
     
     account = recover_account(client)
     if not account:
         return
     
-    client.transact(account, transaction)
+    client.make_transact(account, transaction)
 
 
 # Exibir Extrato
@@ -281,8 +282,8 @@ def show_extract(clients: list):
     if not transactions:
         extract = "Não foram realizadas movimentações!"
     else:
-        for transact in transactions:
-            extract += f"\n{transact['type']}:\n\tR$ {transact['value']:.2f}"
+        for transaction in transactions:
+            extract += f"\n{transaction['type']}:\n\tR$ {transaction['value']:.2f}"
     
     print(extract)
     print(f'\033[94m'
@@ -309,7 +310,8 @@ def create_client(clients: list):
         'address': input('Informe o endereço (logradouro, num - bairro - cidade/uf): ')
     }
     
-    clients.append(PessoaFisica(**user_data))
+    client = PessoaFisica(**user_data)
+    clients.append(client)
     
     print('\033[92m'
         'Usuário cadastrado com sucesso!'
@@ -329,6 +331,7 @@ def create_current_account(num_account, clients, accounts):
     
     account = ContaCorrente.new_account(client, num_account)
     accounts.append(account)
+    client.accounts.append(account)
     
     print('\033[92m'
         'Conta criada com sucesso!'
