@@ -16,11 +16,11 @@ class Cliente:
 
 
 class PessoaFisica(Cliente):
-    def __init__(self, cpf: str, name: str, birth_date: str, address):
+    def __init__(self, cpf: str, name: str, birth_date: str, address: str):
         super().__init__(address)
+        self.cpf = cpf
         self.name = name
         self.birth_date = birth_date
-        self.cpf = cpf
 
 
 class Conta:
