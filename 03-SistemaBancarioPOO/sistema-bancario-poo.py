@@ -55,18 +55,17 @@ class Conta:
     def get_history(self):
         return self._history
     
-    def sacar(self, value: float):
-        saldo = self.get_saldo
-        saldo_exceeded = value > saldo
-        
-        if saldo_exceeded:
+    def sacar(self, value: float):        
+        if value > self.get_saldo:
             print('\033[91m'
                 'Operação falhou! Você não tem saldo suficiente.'
                 '\033[m')
         
         elif value > 0:
             self._balance -= value
-            print(f'\033[91m'
+            print(f'\033[92m'
+                f'Retirada efetuado com sucesso!\n'
+                f'\033[91m'
                 f'Retirada:\tR$ {value:.2f}'
                 f'\033[m')
             return True
@@ -82,8 +81,9 @@ class Conta:
         if value > 0:
             self._balance += value
             print(f'\033[92m'
-                    f'Depósito:\tR$ {value:.2f}'
-                    f'\033[m')
+                f'Depósito efetuado com sucesso!\n'
+                f'Depósito:\tR$ {value:.2f}'
+                f'\033[m')
         
         else:
             print('\033[91m'
@@ -102,7 +102,8 @@ class ContaCorrente(Conta):
     
     def sacar(self, value: float):
         num_saques = len(
-            [transact for transact in self.get_history.transactions if transact['type'] == Saque.__name__]
+            [transact for transact in self.get_history.get_transactions 
+             if transact['type'] == Saque.__name__]
         )
         
         limit_exceeded = value > self._limit
@@ -145,7 +146,7 @@ class Historico:
         self._transactions = list()
     
     @property
-    def transactions(self):
+    def get_transactions(self):
         return self._transactions    
     
     def add_transaction(self, transaction):
@@ -194,11 +195,11 @@ class Deposito(Transacao):
 def menu():
     title = " MENU "
     display = f"""
-    {title:=^24}
+    {title:=^26}
     [D]\tDepositar
     [S]\tSacar
     [E]\tExtrato
-    [U]\tNovo Usuário
+    [C]\tNovo Cliente
     [N]\tNova Conta
     [L]\tListar Contas
     [Q]\tSair
@@ -206,7 +207,7 @@ def menu():
     return input(textwrap.dedent(display))
 
 
-# Filtrar Usuários
+# Filtrar Clientes
 def filter_client(cpf: str, clients: list):
     filtered_clients = [client for client in clients if client.cpf == cpf]
     return filtered_clients[0] if filtered_clients else None
@@ -218,7 +219,6 @@ def recover_account(client):
         print('\033[91m'
             'Cliente não possui conta!'
             '\033[m')
-    # FIXME
     return client.accounts[0]
 
 
@@ -245,7 +245,7 @@ def depositar(clients: list):
 
 # Saque
 def sacar(clients: list):
-    cpf = input("Informe o CPF do cliente: ")
+    cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
     
     if not client:
@@ -266,7 +266,7 @@ def sacar(clients: list):
 
 # Exibir Extrato
 def show_extract(clients: list):
-    cpf = input("Informe o CPF do cliente: ")
+    cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
     
     if not client:
@@ -280,9 +280,9 @@ def show_extract(clients: list):
         return
     
     title = ' EXTRATO '
-    print(f'{title:=^24}')
+    print(f'{title:=^26}')
     
-    transactions = account.get_history.transactions
+    transactions = account.get_history.get_transactions
     extract = ""
     
     if not transactions:
@@ -290,19 +290,19 @@ def show_extract(clients: list):
     else:
         for transaction in transactions:
             extract += (f"{transaction['type']}:\t"
-                        f"R$ {transaction['value']:>8.2f}"
+                        f"R${transaction['value']:>8.2f}"
                         f"\033[m\n")
     
     print(extract)
     print(f'\033[94m'
-        f'Saldo:\t\tR$ {account.get_saldo:>8.2f}'
+        f'Saldo:\t\tR${account.get_saldo:>8.2f}'
         f'\033[m')
-    print(f'{"":=^24}')
+    print(f'{"":=^26}')
 
 
 # Criar Cliente
 def create_client(clients: list):
-    cpf = input("Informe o CPF do cliente: ")
+    cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
     
     if client:
@@ -313,9 +313,9 @@ def create_client(clients: list):
     
     user_data = {
         'cpf': cpf,
-        'name': input('Informe o nome completo: '),
-        'birth_date': input('Informe a data de nascimento (dd-mm-aaaa): '),
-        'address': input('Informe o endereço (logradouro, num - bairro - cidade/uf): ')
+        'name': input('Informe o Nome Completo: '),
+        'birth_date': input('Informe a Data de Nascimento (dd-mm-aaaa): '),
+        'address': input('Informe o Endereço (logradouro, num, bairro, cidade/uf): ')
     }
     
     clients.append(PessoaFisica(**user_data))
@@ -374,8 +374,8 @@ def main():
         elif option == 'E':
             show_extract(clientes)
         
-        # Opção Novo Usuário
-        elif option == 'U':
+        # Opção Novo Cliente
+        elif option == 'C':
             create_client(clientes)
         
         # Opção Nova Conta
