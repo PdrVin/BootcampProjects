@@ -311,14 +311,12 @@ def create_client(clients: list):
             '\033[m')
         return
     
-    user_data = {
+    clients.append(PessoaFisica(**{
         'cpf': cpf,
         'name': input('Informe o Nome Completo: '),
         'birth_date': input('Informe a Data de Nascimento (dd-mm-aaaa): '),
         'address': input('Informe o Endereço (logradouro, num, bairro, cidade/uf): ')
-    }
-    
-    clients.append(PessoaFisica(**user_data))
+    }))
     
     print('\033[92m'
         'Usuário cadastrado com sucesso!'
