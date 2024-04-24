@@ -36,27 +36,27 @@ class Conta:
         return cls(number, client)
     
     @property
-    def get_saldo(self):
+    def saldo(self):
         return self._balance
     
     @property
-    def get_number(self):
+    def number(self):
         return self._number
     
     @property
-    def get_agency(self):
+    def agency(self):
         return self._agency
     
     @property
-    def get_client(self):
+    def client(self):
         return self._client
     
     @property
-    def get_history(self):
+    def history(self):
         return self._history
     
     def sacar(self, value: float):        
-        if value > self.get_saldo:
+        if value > self.saldo:
             print('\033[91m'
                 'Operação falhou! Você não tem saldo suficiente.'
                 '\033[m')
@@ -95,14 +95,14 @@ class Conta:
 
 
 class ContaCorrente(Conta):
-    def __init__(self, number, client, limit=500.0, limit_saques=3):
+    def __init__(self, number: int, client: PessoaFisica, limit=500.0, limit_saques=3):
         super().__init__(number, client)
         self._limit = limit
         self._limit_saques = limit_saques
     
     def sacar(self, value: float):
         num_saques = len(
-            [transact for transact in self.get_history.get_transactions 
+            [transact for transact in self.history.transactions 
              if transact['type'] == Saque.__name__]
         )
         
@@ -124,16 +124,16 @@ class ContaCorrente(Conta):
     
     def __str__(self) -> str:
         return f"""\
-            Agência:\t{self.get_agency}
-            C/C:\t\t{self.get_number}
-            Titular:\t{self.get_client.name}
+            Agência:\t{self.agency}
+            C/C:\t\t{self.number}
+            Titular:\t{self.client.name}
         """
 
 
 class Transacao(ABC):
     @property
     @abstractproperty
-    def get_value(self) -> float:
+    def value(self) -> float:
         pass
 
     @abstractclassmethod
@@ -146,7 +146,7 @@ class Historico:
         self._transactions = list()
     
     @property
-    def get_transactions(self):
+    def transactions(self):
         return self._transactions    
     
     def add_transaction(self, transaction):
@@ -156,7 +156,7 @@ class Historico:
                     "\033[91m" + "Retirada"
                     if transaction.__class__.__name__ == "Saque"
                     else "\033[92m" + "Deposito",
-                "value": transaction.get_value,
+                "value": transaction.value,
                 "date": datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
             }
         )
@@ -167,14 +167,14 @@ class Saque(Transacao):
         self._value = value
     
     @property
-    def get_value(self):
+    def value(self):
         return self._value
     
-    def register(self, account):
-        transaction_sucessed = account.sacar(self.get_value)
+    def register(self, account: ContaCorrente):
+        transaction_sucessed = account.sacar(self.value)
         
         if transaction_sucessed:
-            account.get_history.add_transaction(self)
+            account.history.add_transaction(self)
 
 
 class Deposito(Transacao):
@@ -182,14 +182,14 @@ class Deposito(Transacao):
         self._value = value
     
     @property
-    def get_value(self):
+    def value(self):
         return self._value
     
-    def register(self, account):
-        transaction_sucessed = account.depositar(self.get_value)
+    def register(self, account: ContaCorrente):
+        transaction_sucessed = account.depositar(self.value)
         
         if transaction_sucessed:
-            account.get_history.add_transaction(self)
+            account.history.add_transaction(self)
 
 
 def menu():
@@ -282,7 +282,7 @@ def show_extract(clients: list):
     title = ' EXTRATO '
     print(f'{title:=^26}')
     
-    transactions = account.get_history.get_transactions
+    transactions = account.history.transactions
     extract = ""
     
     if not transactions:
@@ -295,7 +295,7 @@ def show_extract(clients: list):
     
     print(extract)
     print(f'\033[94m'
-        f'Saldo:\t\tR${account.get_saldo:>8.2f}'
+        f'Saldo:\t\tR${account.saldo:>8.2f}'
         f'\033[m')
     print(f'{"":=^26}')
 
