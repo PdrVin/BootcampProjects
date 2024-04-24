@@ -16,7 +16,7 @@ class Cliente:
 
 
 class PessoaFisica(Cliente):
-    def __init__(self, cpf: str, name: str, birth_date: str, address):
+    def __init__(self, cpf: str, name: str, birth_date: str, address: str):
         super().__init__(address)
         self.cpf = cpf
         self.name = name
@@ -24,7 +24,7 @@ class PessoaFisica(Cliente):
 
 
 class Conta:
-    def __init__(self, number, client):
+    def __init__(self, number: int, client: PessoaFisica):
         self._balance = 0.0
         self._number = number
         self._agency = "0001"
@@ -32,7 +32,7 @@ class Conta:
         self._history = Historico()
     
     @classmethod
-    def new_account(cls, client, number):
+    def new_account(cls, number: int, client: PessoaFisica):
         return cls(number, client)
     
     @property
@@ -208,13 +208,13 @@ def menu():
 
 
 # Filtrar Clientes
-def filter_client(cpf: str, clients: list):
+def filter_client(cpf: str, clients: list) -> PessoaFisica:
     filtered_clients = [client for client in clients if client.cpf == cpf]
     return filtered_clients[0] if filtered_clients else None
 
 
 # Recuperar Conta Cliente
-def recover_account(client):
+def recover_account(client: PessoaFisica) -> ContaCorrente:
     if not client.accounts:
         print('\033[91m'
             'Cliente não possui conta!'
@@ -325,8 +325,8 @@ def create_client(clients: list):
         '\033[m')
 
 
-# Criar Conta
-def create_current_account(num_account, clients, accounts):
+# Criar Conta Corrente
+def create_current_account(num_account: int, clients: list, accounts: list):
     cpf = input("Informe o CPF do cliente: ")
     client = filter_client(cpf, clients)
     
@@ -336,7 +336,7 @@ def create_current_account(num_account, clients, accounts):
             '\033[m')
         return
     
-    account = ContaCorrente.new_account(client, num_account)
+    account = ContaCorrente.new_account(num_account, client)
     accounts.append(account)
     client.accounts.append(account)
     
