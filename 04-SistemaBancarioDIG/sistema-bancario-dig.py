@@ -1,14 +1,44 @@
-from abc import ABC, abstractclassmethod, abstractproperty
-from datetime import datetime
+from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 import textwrap
+
+
+class ContasIterador:
+    def __init__(self, accounts: list):
+        self.accounts = accounts
+        self._index = 0
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        try:
+            account = self.accounts[self._index]
+            return f"""\
+                Agência:\t{account.agency}
+                Número:\t\t{account.number}
+                Titular:\t{account.client.name}
+                Saldo:\t\tR$ {account.saldo:.2f}
+            """
+        except IndexError:
+            raise StopIteration
+        finally:
+            self._index += 1
 
 
 class Cliente:
     def __init__(self, address: str):
         self.address = address
         self.accounts = []
+        self.account_index = 0
     
     def make_transact(self, account, transaction):
+        if len(account.history.daily_transactions()) >= 10:
+            print('\033[91m'
+                'Você excedeu o número de transações permitidas para hoje!'
+                '\033[m')
+            return
+        
         transaction.register(account)
     
     def add_account(self, account):
@@ -55,8 +85,9 @@ class Conta:
     def history(self):
         return self._history
     
-    def sacar(self, value: float):        
-        if value > self.saldo:
+    def sacar(self, value: float):
+        saldo_exceeded = value > self.saldo   
+        if saldo_exceeded:
             print('\033[91m'
                 'Operação falhou! Você não tem saldo suficiente.'
                 '\033[m')
@@ -130,17 +161,6 @@ class ContaCorrente(Conta):
         """
 
 
-class Transacao(ABC):
-    @property
-    @abstractproperty
-    def value(self) -> float:
-        pass
-
-    @abstractclassmethod
-    def register(self, account):
-        pass
-
-
 class Historico:
     def __init__(self):
         self._transactions = list()
@@ -157,9 +177,34 @@ class Historico:
                     if transaction.__class__.__name__ == "Saque"
                     else "\033[92m" + "Deposito",
                 "value": transaction.value,
-                "date": datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
+                "date": datetime.now().strftime("%d-%m-%Y, %H:%M:%S"),
             }
         )
+    
+    # Gerador de Relatórios
+    def create_report(self, transcation_type=None):
+        for transaction in self._transactions:
+            if transcation_type is None or transaction['type'] == transcation_type:
+                yield transaction
+    
+    
+    def daily_transactions(self):
+        current_date = datetime.now(timezone.utc).date()
+        list_operations = [transaction for transaction in self._transactions 
+                           if transaction['date'] == current_date]
+        return list_operations
+
+
+class Transacao(ABC):
+    @property
+    @abstractmethod
+    def value(self) -> float:
+        pass
+    
+    @classmethod
+    @abstractmethod
+    def register(self, account):
+        pass
 
 
 class Saque(Transacao):
@@ -190,6 +235,16 @@ class Deposito(Transacao):
         
         if transaction_sucessed:
             account.history.add_transaction(self)
+
+
+# Decorador de Logs
+def log_transactions(function):
+    def package(*args, **kwargs):
+        result = function(*args, **kwargs)
+        print(f'{datetime.now().date()}: {function.__name__.upper()}')
+        return result
+    
+    return package
 
 
 def menu():
@@ -223,6 +278,7 @@ def recover_account(client: PessoaFisica) -> ContaCorrente:
 
 
 # Deposito
+@log_transactions
 def depositar(clients: list):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
@@ -244,6 +300,7 @@ def depositar(clients: list):
 
 
 # Saque
+@log_transactions
 def sacar(clients: list):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
@@ -265,6 +322,7 @@ def sacar(clients: list):
 
 
 # Exibir Extrato
+@log_transactions
 def show_extract(clients: list):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
@@ -280,27 +338,30 @@ def show_extract(clients: list):
         return
     
     title = ' EXTRATO '
-    print(f'{title:=^26}')
+    print(f'{title:=^46}')
     
-    transactions = account.history.transactions
     extract = ""
+    have_transaction = False
     
-    if not transactions:
+    for transaction in account.history.transactions:
+        have_transaction = True
+        extract += (f"{transaction['type']}:"
+                    f"{transaction['date']:>22}\t"
+                    f"R${transaction['value']:>10.2f}"
+                    f"\033[m\n")
+    
+    if not have_transaction:
         extract = "Não foram realizadas movimentações!"
-    else:
-        for transaction in transactions:
-            extract += (f"{transaction['type']}:\t"
-                        f"R${transaction['value']:>8.2f}"
-                        f"\033[m\n")
     
     print(extract)
     print(f'\033[94m'
-        f'Saldo:\t\tR${account.saldo:>8.2f}'
+        f'Saldo:' + 4*"\t" + f'R${account.saldo:>8.2f}'
         f'\033[m')
-    print(f'{"":=^26}')
+    print(f'{"":=^46}')
 
 
 # Criar Cliente
+@log_transactions
 def create_client(clients: list):
     cpf = input("Informe o CPF do Cliente: ")
     client = filter_client(cpf, clients)
@@ -324,6 +385,7 @@ def create_client(clients: list):
 
 
 # Criar Conta Corrente
+@log_transactions
 def create_current_account(num_account: int, clients: list, accounts: list):
     cpf = input("Informe o CPF do cliente: ")
     client = filter_client(cpf, clients)
@@ -345,7 +407,7 @@ def create_current_account(num_account: int, clients: list, accounts: list):
 
 # Listar Contas
 def list_accounts(accounts: list):
-    for account in accounts:
+    for account in ContasIterador(accounts):
         print('=' * 30)
         print(textwrap.dedent(str(account)))
 
