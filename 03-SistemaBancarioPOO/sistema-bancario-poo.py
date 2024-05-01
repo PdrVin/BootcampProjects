@@ -1,4 +1,4 @@
-from abc import ABC, abstractclassmethod, abstractproperty
+from abc import ABC, abstractmethod
 from datetime import datetime
 import textwrap
 
@@ -130,17 +130,6 @@ class ContaCorrente(Conta):
         """
 
 
-class Transacao(ABC):
-    @property
-    @abstractproperty
-    def value(self) -> float:
-        pass
-
-    @abstractclassmethod
-    def register(self, account):
-        pass
-
-
 class Historico:
     def __init__(self):
         self._transactions = list()
@@ -160,6 +149,18 @@ class Historico:
                 "date": datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
             }
         )
+
+
+class Transacao(ABC):
+    @property
+    @abstractmethod
+    def value(self) -> float:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def register(self, account):
+        pass
 
 
 class Saque(Transacao):
