@@ -33,6 +33,12 @@ class Cliente:
         self.account_index = 0
     
     def make_transact(self, account, transaction):
+        if len(account.history.daily_transactions()) >= 10:
+            print('\033[91m'
+                'Você excedeu o número de transações permitidas para hoje!'
+                '\033[m')
+            return
+        
         transaction.register(account)
     
     def add_account(self, account):
@@ -178,8 +184,15 @@ class Historico:
     # Gerador de Relatórios
     def create_report(self, transcation_type=None):
         for transaction in self._transactions:
-            if transcation_type is None or transaction["type"].lower() == transcation_type.lower():
+            if transcation_type is None or transaction['type'].lower() == transcation_type.lower():
                 yield transaction
+    
+    
+    def daily_transactions(self):
+        current_date = datetime.now(timezone.utc).date()
+        list_operations = [transaction for transaction in self._transactions 
+                           if transaction['date'] == current_date]
+        return list_operations
 
 
 class Transacao(ABC):
@@ -330,7 +343,7 @@ def show_extract(clients: list):
     extract = ""
     have_transaction = False
     
-    for transaction in account.history.create_report():
+    for transaction in account.history.transactions:
         have_transaction = True
         extract += (f"{transaction['type']}:"
                     f"{transaction['date']:>22}\t"
