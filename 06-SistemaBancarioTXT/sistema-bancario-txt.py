@@ -365,10 +365,12 @@ def show_extract(clients: list):
 
     for transaction in account.history.create_report():
         have_transaction = True
-        extract += (f"{transaction['type']}:"
-                    f"[{transaction['date']:>24}]\t"
-                    f"R${transaction['value']:>10.2f}"
-                    f"\033[m\n")
+        extract += (
+            f"{transaction['type']}:"
+            f"[{transaction['date']:>24}]\t"
+            f"R${transaction['value']:>10.2f}"
+            f"\033[m\n"
+        )
 
     if not have_transaction:
         extract = "Não foram realizadas movimentações!"
