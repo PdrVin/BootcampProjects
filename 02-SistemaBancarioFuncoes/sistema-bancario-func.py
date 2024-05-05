@@ -1,5 +1,6 @@
 import funcoes_bank as fb
 
+
 def main():
     # Constantes
     LIMITE_SAQUE = 3
@@ -51,7 +52,7 @@ def main():
         elif option == 'N':
             num_account = len(accounts) + 1
             conta = fb.create_current_account(AGENCY, num_account, users)
-            
+
             if conta:
                 accounts.append(conta)
 
