@@ -1,4 +1,4 @@
-# Bootcamp Python AI Backend Developer Projects
+# Bootcamp _Python AI Backend Developer_ Projects
 
 Este repositório contém os desafios de projetos do bootcamp Python AI Backend Developer da Digital Innovation One (DIO). Cada desafio é uma oportunidade para praticar e aprimorar suas habilidades em Python e desenvolvimento de back-end para inteligência artificial.
 
@@ -11,8 +11,17 @@ Este repositório contém os desafios de projetos do bootcamp Python AI Backend 
    - Otimização do sistema com funções que tornam a programação mais limpa e escalável.
 
 3. **Desafio 3: [Modelando o Sistema Bancário em POO com Python](https://github.com/PdrVin/BootcampProjects/tree/main/03-SistemaBancarioPOO)**
-   - Descrição breve do desafio.
-   - Requisitos técnicos.
+   - Aplicando os conceitos de Orientação ao Objetos no sistema.
+
+4. **Desafio 4: [Implementando Decoradores, Iteradores e Geradores no Sistema Bancário](https://github.com/PdrVin/BootcampProjects/tree/main/04-SistemaBancarioDIG)**
+   - Aprimoramento do sistema com as funcionalidades de Decoradores, Iteradores e Geradores.
+
+5. **Desafio 5: [Implementando Exibição de Registro de Logs com Data e Hora ao Sistema Bancário](https://github.com/PdrVin/BootcampProjects/tree/main/05-SistemaBancarioDateTime)**
+   - Acrescentando as funcionalidades de DateTime aos registros do sistema.
+
+6. **Desafio 6: [Aplicando Manipulação de Arquivos através de um Registro de Logs em Arquivo de Texto Externo](https://github.com/PdrVin/BootcampProjects/tree/main/06-SistemaBancarioTXT)**
+   - Configuração de Registro de Logs em arquivo externo.
+
 
 ## Como Contribuir
 
@@ -29,5 +38,3 @@ Este repositório contém os desafios de projetos do bootcamp Python AI Backend 
 - Oferece cursos, bootcamps e eventos gratuitos para desenvolvedores e entusiastas de tecnologia.
 
 Para mais informações, visite [Digital Innovation One](https://digitalinnovation.one/).
-
-
