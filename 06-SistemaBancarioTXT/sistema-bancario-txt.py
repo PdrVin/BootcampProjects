@@ -1,6 +1,6 @@
+import textwrap
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-import textwrap
 from pathlib import Path
 
 ROOT_PATH = Path(__file__).parent
